@@ -1,8 +1,8 @@
+import getImages from './js/async-function';
 import Notiflix from 'notiflix';
 import SimpleLightbox from 'simplelightbox';
 // import markupCard from './partials/templates/markupCards.hbs';
 import 'simplelightbox/dist/simple-lightbox.min.css';
-const axios = require('axios').default;
 
 const formEl = document.querySelector('.search-form');
 const galleryList = document.querySelector('.gallery');
@@ -15,48 +15,23 @@ btnEl.addEventListener('click', onClickLoadMore);
 let page = 1;
 let value = '';
 
-const BASE_URL = 'https://pixabay.com/api/';
-const KEY = '34228603-b891bcae5effe4f7195da3207';
-
-function makeMarkupCards(arr) {
-  const imageEl = arr.map(el => markupCard(el).join(''));
-  galleryList.insertAdjacentHTML('beforeend', imageEl);
-}
-
-async function getImages(value) {
-  try {
-    const response = await axios.get(
-      `${BASE_URL}?key=${KEY}&q=${value}&page=${page}`,
-      {
-        params: {
-          image_type: 'photo',
-          orientation: 'horizontal',
-          safesearch: true,
-          per_page: 40,
-        },
-      }
-    );
-    page += 1;
-    const listImage = response.data;
-    return listImage;
-  } catch (error) {
-    console.error(error);
-  }
-}
-
 function onSearchForm(e) {
   e.preventDefault();
 
   value = e.currentTarget.elements.searchQuery.value;
   page = 1;
   galleryList.innerHTML = '';
+  messageEl.classList.add('message-hiden');
+  btnEl.classList.add('hiden');
 
-  getImages(value)
+  getImages(value, page)
     .then(listImage => {
       if (listImage.hits.length === 0) {
         Notiflix.Notify.failure(
           'Sorry, there are no images matching your search query. Please try again.'
         );
+        // messageEl.classList.add('message-hiden');
+        // btnEl.classList.add('hiden');
       }
 
       if (listImage.hits.length >= 1) {
@@ -93,6 +68,8 @@ function onSearchForm(e) {
           .join('');
         galleryList.insertAdjacentHTML('beforeend', imageEl);
 
+        page++;
+
         if (listImage.hits.length >= 1 && listImage.hits.length < 40) {
           messageEl.classList.remove('message-hiden');
         } else if (listImage.hits.length == 40) {
@@ -107,7 +84,7 @@ function onSearchForm(e) {
 }
 
 function onClickLoadMore() {
-  getImages(value)
+  getImages(value, page)
     .then(listImage => {
       if (listImage.hits.length >= 1) {
         const imageEl = listImage.hits
@@ -139,6 +116,8 @@ function onClickLoadMore() {
           )
           .join('');
         galleryList.insertAdjacentHTML('beforeend', imageEl);
+
+        page++;
 
         if (listImage.hits.length >= 0 && listImage.hits.length < 40) {
           const message =
