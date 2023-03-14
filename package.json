@@ -22,6 +22,8 @@
     "handlebars": "^4.7.7",
     "modern-normalize": "^1.1.0",
     "notiflix": "^3.2.6",
+    "nunjucks": "^3.2.3",
+    "remove": "^0.1.5",
     "simplelightbox": "^2.12.1"
   },
   "devDependencies": {

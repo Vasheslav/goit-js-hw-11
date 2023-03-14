@@ -37,7 +37,6 @@ function onSearchForm(e) {
         Notiflix.Notify.info(`Hooray! We found ${listImage.totalHits} images.`);
 
         makeMarkupCard(listImage);
-        makeSmoothScrolling();
 
         page++;
 
@@ -59,7 +58,6 @@ function onClickLoadMore() {
     .then(listImage => {
       if (listImage.hits.length >= 1) {
         makeMarkupCard(listImage);
-        makeSmoothScrolling();
 
         page++;
 
@@ -71,7 +69,6 @@ function onClickLoadMore() {
         }
       }
       lightbox.refresh();
-      makeSmoothScrolling();
     })
     .catch(error => {
       console.log(error);
@@ -118,14 +115,3 @@ function makeMarkupCard(listImage) {
 }
 
 const lightbox = new SimpleLightbox('.gallery a', {});
-
-function makeSmoothScrolling() {
-  const { height: cardHeight } = document
-    .querySelector('.gallery')
-    .firstElementChild.getBoundingClientRect();
-
-  window.scrollBy({
-    botton: cardHeight * -100,
-    behavior: 'smooth',
-  });
-}
