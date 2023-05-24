@@ -10,69 +10,67 @@ const messageEl = document.querySelector('.message');
 
 formEl.addEventListener('submit', onSearchForm);
 btnEl.addEventListener('click', onClickLoadMore);
+// window.addEventListener('scroll', onScroll);
 
 let page = 1;
 let value = '';
 
-function onSearchForm(e) {
+async function onSearchForm(e) {
   e.preventDefault();
 
-  value = e.currentTarget.elements.searchQuery.value;
+  value = e.currentTarget.elements.searchQuery.value.trim();
+  if (!value) {
+    return;
+  }
 
   initialValues();
 
-  getImages(value, page)
-    .then(listImage => {
-      if (value === '') {
-        return;
+  try {
+    const listImage = await getImages(value, page);
+    if (listImage.hits.length === 0) {
+      Notiflix.Notify.failure(
+        'Sorry, there are no images matching your search query. Please try again.'
+      );
+    }
+
+    if (listImage.hits.length >= 1) {
+      Notiflix.Notify.info(`Hooray! We found ${listImage.totalHits} images.`);
+
+      makeMarkupCard(listImage);
+
+      page++;
+
+      if (listImage.hits.length >= 1 && listImage.hits.length < 40) {
+        messageEl.classList.remove('message-hiden');
+      } else if (listImage.hits.length === 40) {
+        btnEl.classList.remove('hiden');
       }
-
-      if (listImage.hits.length === 0) {
-        Notiflix.Notify.failure(
-          'Sorry, there are no images matching your search query. Please try again.'
-        );
-      }
-
-      if (listImage.hits.length >= 1) {
-        Notiflix.Notify.info(`Hooray! We found ${listImage.totalHits} images.`);
-
-        makeMarkupCard(listImage);
-
-        page++;
-
-        if (listImage.hits.length >= 1 && listImage.hits.length < 40) {
-          messageEl.classList.remove('message-hiden');
-        } else if (listImage.hits.length === 40) {
-          btnEl.classList.remove('hiden');
-        }
-      }
-      lightbox.refresh();
-    })
-    .catch(error => {
-      console.log(error);
-    });
+    }
+    lightbox.refresh();
+  } catch (error) {
+    console.log(error);
+  }
 }
 
-function onClickLoadMore() {
-  getImages(value, page)
-    .then(listImage => {
-      if (listImage.hits.length >= 1) {
-        makeMarkupCard(listImage);
+async function onClickLoadMore() {
+  try {
+    const listImage = await getImages(value, page);
+    if (listImage.hits.length >= 1) {
+      makeMarkupCard(listImage);
 
-        page++;
+      page++;
 
-        if (listImage.hits.length >= 1 && listImage.hits.length < 40) {
-          messageEl.classList.remove('message-hiden');
-          btnEl.classList.add('hiden');
-        } else if (listImage.hits.length === 40) {
-          btnEl.classList.remove('hiden');
-        }
+      if (listImage.hits.length >= 1 && listImage.hits.length < 40) {
+        messageEl.classList.remove('message-hiden');
+        btnEl.classList.add('hiden');
+      } else if (listImage.hits.length === 40) {
+        btnEl.classList.remove('hiden');
       }
-      lightbox.refresh();
-    })
-    .catch(error => {
-      console.log(error);
-    });
+    }
+    lightbox.refresh();
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 function initialValues() {
